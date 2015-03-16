@@ -1,0 +1,18 @@
+##################
+ Ipython Notebook
+##################
+ipython==2.3.1
+Jinja2==2.7.3
+jsonschema==2.4.0
+pyzmq==14.5.0
+sympy==0.7.6
+tornado==4.1
+
+#############
+ Scipy stack
+#############
+numpy==1.9.2
+scipy==0.15.1
+matplotlib==1.4.3
+pandas==0.15.2
+pygraphviz==1.2.0
