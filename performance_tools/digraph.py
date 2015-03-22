@@ -1,3 +1,4 @@
+import csv
 import numpy as np
 from pygraphviz import AGraph as DotGraph
 
@@ -137,7 +138,7 @@ class Digraph(object):
         """
         return self._indexed_vertices[vertex]
 
-    def draw(self, filename, relative_value=False):
+    def draw(self, filename, relative_value=False, prog='neato'):
         """Draw digraph using Graphviz.
 
         :param filename: Output filename to draw.
@@ -181,28 +182,41 @@ class Digraph(object):
                     formatted_value = str(value)
                 dot.add_edge(i, j, label=formatted_value)
 
-        dot.layout(prog='dot')
+        dot.layout(prog=prog)
         dot.draw(filename)
 
+    def subgraph(self, vertices):
+        vertices = set(sorted(vertices))
+        rows = [False] * len(self._vertices)
+        for i in [self._indexed_vertices[v] for v in vertices]:
+            rows[i] = True
+
+        nprows = np.array(rows, dtype=bool)
+
+        arcs = self._arcs[nprows][:, nprows]
+
+        return Digraph(vertices, arcs)
+
     @staticmethod
-    def from_csv(csv_file, separator=','):
+    def from_csv(filename, separator=','):
         """Make a digraph from a csv file. Format must be:
         origin_vertex,destination_vertex
         origin_vertex,destination_vertex
         ...
 
-        :param csv_file: Input csv file.
-        :type csv_file: str
+        :param filename: Input csv file.
+        :type filename: str
         :param separator: Csv separator.
         :type separator: str
         :return: Digraph.
         :rtype: Digraph
         """
-        with open(csv_file, 'r') as f:
+        with open(filename, 'r') as csvfile:
             vertices = set()
 
             # Get all vertices
-            for (origin, destination) in (line.strip().split(separator) for line in f.readlines()):
+            reader = csv.reader(csvfile)
+            for (origin, destination) in reader:
                 vertices.add(origin)
                 vertices.add(destination)
 
@@ -210,7 +224,7 @@ class Digraph(object):
             vertices = set(sorted(vertices))
 
             # Return pointer to beginning
-            f.seek(0)
+            csvfile.seek(0)
 
             # Create zeros array for arcs
             arcs = np.zeros((len(vertices), len(vertices)), dtype=np.int8)
@@ -219,7 +233,8 @@ class Digraph(object):
             indexed_vertices = {v: i for (i, v) in enumerate(vertices)}
 
             # Store each arc (weight based)
-            for (origin, destination) in (line.strip().split(separator) for line in f.readlines()):
+            reader = csv.reader(csvfile)
+            for (origin, destination) in reader:
                 arcs[indexed_vertices[origin], indexed_vertices[destination]] += 1
 
         return Digraph(vertices, arcs)
