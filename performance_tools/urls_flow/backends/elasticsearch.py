@@ -3,12 +3,15 @@
 from __future__ import unicode_literals, absolute_import
 
 from elasticsearch import Elasticsearch
+
 from performance_tools.urls_flow.backends.base import BaseURLFlowBackend
-from performance_tools.urls_flow.urls import normalize_url
+from performance_tools.utils.url import normalize_url
 
 
 class ElasticURLFlowBackend(BaseURLFlowBackend):
-    def __init__(self, host='localhost', port=9200, username=None, password=None, protocol='http', query='*', date_from="", date_to=""):
+    """Query Elasticsearch to collect nginx logs.
+    """
+    def __init__(self, host='localhost', port=9200, username=None, password=None, protocol='http', query='*', date_from="", date_to="", size=50):
         if username is not None and password is not None:
             self.url = '{}://{}:{}@{}:{:d}'.format(protocol, username, password, host, port)
         else:
@@ -47,13 +50,13 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
         }
 
         # Search result batch size
-        self._size = 50
+        self._size = size
 
         # Returned fields
         self._fields = [
             "referrer",
-            "request"
-
+            "request",
+            "time_response",
         ]
 
         # Scrollable search
@@ -63,10 +66,11 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
 
         super(ElasticURLFlowBackend, self).__init__()
 
-    def extract_url_from_result(self, result):
+    def extract_url_from_result(self, result, regex=None):
         return [
-            (normalize_url(hit['fields']['referrer'][0].strip('"')) or "-",
-             normalize_url(hit['fields']['request'][0]) or "-")
+            (normalize_url(hit['fields']['referrer'][0].strip('"'), regex) or "-",
+             normalize_url(hit['fields']['request'][0], regex) or "-",
+             hit['fields']['time_response'][0])
             for hit in [i for i in result['hits']['hits'] if 'fields' in i]
         ]
 

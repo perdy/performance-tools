@@ -21,3 +21,9 @@ pygraphviz==1.2.0
 # Elasticsearch #
 #################
 elasticsearch==1.4.0
+
+#########
+# Utils #
+#########
+progressbar2==2.7.3
+Pygments==2.0.2

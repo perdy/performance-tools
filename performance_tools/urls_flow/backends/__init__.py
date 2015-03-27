@@ -1,1 +1,1 @@
-from performance_tools.urls_flow.backends.elasticsearch import Elastic
+from performance_tools.urls_flow.backends.elasticsearch import ElasticURLFlowBackend

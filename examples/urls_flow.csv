@@ -1,0 +1,12 @@
+Referrer,Request,Time
+-,/,0.123
+-,/foo,0.821
+/,/foo,0.021
+/,/foo,0.032
+/,/bar,0.420
+/foo,/bar,0.092
+/,/foo,1,120
+/bar,/foo/bar,0.398
+/bar,/foo/bar,0.521
+/,/foo/bar,0.350
+/foo,/foo/bar,0.456
