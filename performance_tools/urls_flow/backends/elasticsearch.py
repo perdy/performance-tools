@@ -11,7 +11,9 @@ from performance_tools.utils.url import normalize_url
 class ElasticURLFlowBackend(BaseURLFlowBackend):
     """Query Elasticsearch to collect nginx logs.
     """
-    def __init__(self, host='localhost', port=9200, username=None, password=None, protocol='http', query='*', date_from="", date_to="", size=50):
+
+    def __init__(self, host='localhost', port=9200, username=None, password=None, protocol='http', query='*',
+                 date_from="", date_to="", size=50):
         if username is not None and password is not None:
             self.url = '{}://{}:{}@{}:{:d}'.format(protocol, username, password, host, port)
         else:
@@ -54,6 +56,7 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
 
         # Returned fields
         self._fields = [
+            "@timestamp",
             "referrer",
             "request",
             "time_response",
@@ -66,13 +69,16 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
 
         super(ElasticURLFlowBackend, self).__init__()
 
+    def _get_fields(self, hit, regex=None):
+        return (
+            hit['fields']['@timestamp'][0],
+            normalize_url(hit['fields']['referrer'][0].strip('"'), regex) or "-",
+            normalize_url(hit['fields']['request'][0], regex) or "-",
+            hit['fields']['time_response'][0],
+        )
+
     def extract_url_from_result(self, result, regex=None):
-        return [
-            (normalize_url(hit['fields']['referrer'][0].strip('"'), regex) or "-",
-             normalize_url(hit['fields']['request'][0], regex) or "-",
-             hit['fields']['time_response'][0])
-            for hit in [i for i in result['hits']['hits'] if 'fields' in i]
-        ]
+        return [self._get_fields(hit, regex) for hit in [i for i in result['hits']['hits'] if 'fields' in i]]
 
     def __iter__(self):
         # Make first query
