@@ -138,7 +138,7 @@ class Digraph(object):
         """
         return self._indexed_vertices[vertex]
 
-    def draw(self, filename, relative_value=False, prog='neato'):
+    def draw(self, filename, relative_value=False, prog='dot'):
         """Draw digraph using Graphviz.
 
         :param filename: Output filename to draw.
