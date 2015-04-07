@@ -9,3 +9,7 @@ class PerformanceException(Exception):
 
 class ProgressBarException(PerformanceException):
     pass
+
+
+class ElasticsearchException(PerformanceException):
+    pass

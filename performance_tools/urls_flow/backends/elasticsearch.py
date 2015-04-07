@@ -13,7 +13,7 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
     """
 
     def __init__(self, host='localhost', port=9200, username=None, password=None, protocol='http', query='*',
-                 date_from="", date_to="", size=50):
+                 date_from="", date_to="", size=50, timeout=60):
         if username is not None and password is not None:
             self.url = '{}://{}:{}@{}:{:d}'.format(protocol, username, password, host, port)
         else:
@@ -67,18 +67,26 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
         self._scroll = '1m'
         self._scroll_id = None
 
+        # Timeout
+        self._timeout = timeout
+
         super(ElasticURLFlowBackend, self).__init__()
 
     def _get_fields(self, hit, regex=None):
-        return (
-            hit['fields']['@timestamp'][0],
-            normalize_url(hit['fields']['referrer'][0].strip('"'), regex) or "-",
-            normalize_url(hit['fields']['request'][0], regex) or "-",
-            hit['fields']['time_response'][0],
-        )
+        try:
+            return (
+                hit['fields']['@timestamp'][0],
+                normalize_url(hit['fields']['referrer'][0].strip('"'), regex) or "-",
+                normalize_url(hit['fields']['request'][0], regex) or "-",
+                hit['fields']['time_response'][0],
+            )
+        except KeyError:
+            return None
 
     def extract_url_from_result(self, result, regex=None):
-        return [self._get_fields(hit, regex) for hit in [i for i in result['hits']['hits'] if 'fields' in i]]
+        hits = [i for i in result['hits']['hits'] if 'fields' in i]
+        fields = [self._get_fields(hit, regex) for hit in hits]
+        return [i for i in fields if i is not None]
 
     def __iter__(self):
         # Make first query
@@ -90,6 +98,7 @@ class ElasticURLFlowBackend(BaseURLFlowBackend):
             fields=self._fields,
             search_type=self._search_type,
             scroll=self._scroll,
+            timeout=self._timeout,
         )
 
         # Get total hits

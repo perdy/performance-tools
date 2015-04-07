@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from abc import ABCMeta
 import csv
 
-from performance_tools.exceptions import ProgressBarException
+from performance_tools.exceptions import ProgressBarException, ElasticsearchException
 from performance_tools.utils.progress_bar import create_progress_bar
 
 
@@ -61,8 +61,10 @@ class BaseURLFlowBackend(object):
                         progress.update(count)
                     elif verbose == 1:
                         print "{:d}/{:d} ({:d}%)".format(count, self._total_hits, count * 100 / self._total_hits)
-        except (KeyError, ZeroDivisionError):
-            raise ValueError("Search doesn't return any result")
+        except ZeroDivisionError:
+            raise ElasticsearchException("Search doesn't return any result")
+        except KeyError:
+            raise ElasticsearchException("Invalid result")
 
     def __iter__(self):
         """Iterate over each result.
