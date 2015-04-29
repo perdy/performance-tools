@@ -37,13 +37,7 @@ class BaseURLFlowBackend(object):
         :type filename: str
         :raise: ValueError if not found any result.
         """
-        total_hits = 0
-
-        if verbose == 2:
-            try:
-                progress = create_progress_bar(total_hits, 'Extract URLs', 'url')
-            except ProgressBarException:
-                verbose = 1
+        progress = None
 
         try:
             with open(filename, 'w') as csv_file:
@@ -51,14 +45,21 @@ class BaseURLFlowBackend(object):
                 writer.writerow(['Referrer', 'Request', 'Time'])
                 count = 0
                 for result in self:
+                    # Create progress bar or down verbose level
+                    if verbose == 2 and progress is None:
+                        try:
+                            progress = create_progress_bar(self._total_hits, 'Extract URLs', 'url')
+                        except ProgressBarException:
+                            verbose = 1
+
+                    # Write results to csv
                     rows = self.extract_url_from_result(result, regex)
                     writer.writerows(rows)
 
+                    # Update progress
                     count += len(rows)
                     if verbose == 2:
-                        if not total_hits:
-                            progress.maxval = self._total_hits
-                        progress.update(count)
+                        progress.update(count if count < self._total_hits else self._total_hits)
                     elif verbose == 1:
                         print "{:d}/{:d} ({:d}%)".format(count, self._total_hits, count * 100 / self._total_hits)
         except ZeroDivisionError:

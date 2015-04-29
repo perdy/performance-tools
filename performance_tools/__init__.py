@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Performance tools"""
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __license__ = 'GPLv3'
 
 __author__ = 'José Antonio Perdiguero López'

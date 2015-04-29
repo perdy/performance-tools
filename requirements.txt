@@ -1,7 +1,7 @@
 ####################
 # Ipython Notebook #
 ####################
-ipython==2.3.1
+ipython==3.1.0
 Jinja2==2.7.3
 jsonschema==2.4.0
 pyzmq==14.5.0

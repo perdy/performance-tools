@@ -32,7 +32,7 @@ class Tox(TestCommand):
 
 
 setup(
-    name='ebury-elastic',
+    name='performance-tools',
     version=performance_tools.__version__,
     description=performance_tools.__description__,
     long_description='\n'.join([open('README.rst').read(), open('CHANGELOG').read()]),

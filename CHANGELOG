@@ -1,4 +1,7 @@
 Changes
 =======
+v0.2.0 - 27/04/2015
+ * Add an analysis module for urls flow.
+
 v0.1.0 - 08/04/2015
  * Initial release.
