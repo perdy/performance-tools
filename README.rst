@@ -41,6 +41,7 @@ Make a virtualenv::
     
 Install SciPy stack::
     
+    sudo apt-get install gfortran libopenblas-dev liblapack-dev
     pip install numpy scipy matplotlib pandas
 
 Install python requirements::
